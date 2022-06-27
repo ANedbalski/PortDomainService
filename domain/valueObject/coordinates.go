@@ -1,4 +1,4 @@
-package domain
+package valueObject
 
 type GPS struct {
 }

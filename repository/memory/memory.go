@@ -1,13 +1,8 @@
 package memory
 
 import (
-	"errors"
 	"ports/domain"
 	"sync"
-)
-
-var (
-	ErrPortNotFound = errors.New("port with this id wasn't found")
 )
 
 type Port struct {
@@ -26,7 +21,7 @@ func (p *Port) GetById(id uint64) (*domain.Port, error) {
 	if port, ok := p.ports[id]; ok {
 		return port, nil
 	}
-	return nil, ErrPortNotFound
+	return nil, domain.ErrPortNotFound
 }
 
 func (p *Port) Save(port *domain.Port) error {
@@ -36,12 +31,12 @@ func (p *Port) Save(port *domain.Port) error {
 		p.Unlock()
 		return nil
 	}
-	return ErrPortNotFound
+	return domain.ErrPortNotFound
 }
 
 func (p *Port) UpdateOrCreate(port *domain.Port) error {
 	err := p.Save(port)
-	if err == ErrPortNotFound {
+	if err == domain.ErrPortNotFound {
 		return p.Add(port)
 	}
 	return err

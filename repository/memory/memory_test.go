@@ -18,7 +18,7 @@ func TestPort_GetById(t *testing.T) {
 			name:   "port doesn't exists in the DB",
 			id:     5,
 			exp:    nil,
-			expErr: ErrPortNotFound,
+			expErr: domain.ErrPortNotFound,
 		},
 		{
 			name:   "port exists in the DB",
@@ -79,7 +79,7 @@ func TestPort_Save(t *testing.T) {
 		{
 			name:   "Port don't exists in DB return error",
 			port:   &domain.Port{ID: 10, Name: "A10"},
-			expErr: ErrPortNotFound,
+			expErr: domain.ErrPortNotFound,
 		},
 	}
 
@@ -130,9 +130,9 @@ func TestPort_UpdateOrCreate(t *testing.T) {
 func initDBWithFixtures() *Port {
 	db := &Port{
 		ports: map[uint64]*domain.Port{
-			1: &domain.Port{ID: 1, Name: "A1"},
-			2: &domain.Port{ID: 2, Name: "A2"},
-			3: &domain.Port{ID: 3, Name: "A3"},
+			1: {ID: 1, Name: "A1"},
+			3: {ID: 3, Name: "A3"},
+			2: {ID: 2, Name: "A2"},
 		},
 	}
 	return db
