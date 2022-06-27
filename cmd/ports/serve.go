@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"ports/domain/services"
+	"ports/domain/services/importer"
 	"ports/repository/memory"
 	http_srv "ports/server/http"
 	"ports/task"
@@ -45,7 +46,11 @@ func serveAction(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("cannot instantiate Port Service: %w", err)
 	}
-	portImportService, err := services.NewPortImport(services.WithInMemoryPortImportRepository(memory.NewPort()))
+
+	portImportService, err := services.NewPortImport(
+		services.WithInMemoryPortImportRepository(memory.NewPort()),
+		services.WithStreamingPortImporter(importer.NewJSONStream()),
+		services.WithSugaredLogger(log))
 	if err != nil {
 		return fmt.Errorf("cannot instantiate Port Service: %w", err)
 	}
@@ -56,7 +61,7 @@ func serveAction(c *cli.Context) error {
 	// currently launching in the serve process, because test implementation
 	// implements only chan version of queue
 	// supposed to live in the separate process
-	dispatcher := task.NewDispatcher(portImportService)
+	dispatcher := task.NewDispatcher(portImportService, log)
 	dispatcher.Sub()
 	dispatcher.Run(ctx)
 
