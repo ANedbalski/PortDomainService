@@ -40,6 +40,9 @@ func serveAction(c *cli.Context) error {
 	var wg sync.WaitGroup
 
 	//setup event dispatcher
+	// currently launching in the serve process, because test implementation
+	// implements only chan version of queue
+	// supposed to live in the separate process
 	dispatcher := task.NewDispatcher()
 	dispatcher.Sub()
 	dispatcher.Run(ctx)

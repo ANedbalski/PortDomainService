@@ -17,6 +17,7 @@ func main() {
 		Usage: "Run the ports service",
 		Commands: []*cli.Command{
 			serveCommand,
+			processCommand,
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
