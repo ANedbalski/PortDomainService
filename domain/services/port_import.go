@@ -1,15 +1,24 @@
 package services
 
 import (
+	"go.uber.org/zap"
 	"io"
 	"ports/domain"
+	"ports/domain/services/importer"
 	"ports/repository/pg"
 )
 
 type PortImportConfiguration func(os *PortImport) error
 
+type Importer interface {
+	Watch() <-chan importer.Entry
+	Start(src io.Reader)
+}
+
 type PortImport struct {
-	ports domain.PortRepository
+	ports    domain.PortRepository
+	importer Importer
+	log      *zap.SugaredLogger
 }
 
 //NewPortImport takes a variable amount of PortImportConfiguration functions and returns a new PortImport
@@ -39,7 +48,7 @@ func WithInMemoryPortImportRepository(r domain.PortRepository) PortImportConfigu
 func WithPGPortImportRepository(dsn string) PortImportConfiguration {
 	return func(pi *PortImport) error {
 		// call to create PG connection from DSN
-		p, err := pg.New()
+		p, err := pg.NewPort()
 		if err != nil {
 			return err
 		}
@@ -48,6 +57,32 @@ func WithPGPortImportRepository(dsn string) PortImportConfiguration {
 	}
 }
 
+func WithStreamingPortImporter(i Importer) PortImportConfiguration {
+	return func(pi *PortImport) error {
+		pi.importer = i
+		return nil
+	}
+}
+
+func WithSugaredLogger(l *zap.SugaredLogger) PortImportConfiguration {
+	return func(pi *PortImport) error {
+		pi.log = l
+		return nil
+	}
+}
+
 func (pi *PortImport) Import(in io.Reader) error {
+	go func() {
+		for data := range pi.importer.Watch() {
+			if data.Err != nil {
+				pi.log.Errorw("error parsing json", "err", data.Err)
+			}
+			err := pi.ports.UpdateOrCreate(data.Port.ToDomain())
+			if err != nil {
+				pi.log.Errorw("error storing to DB", "err", err)
+			}
+		}
+	}()
+	pi.importer.Start(in)
 	return nil
 }
