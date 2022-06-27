@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"ports/domain/services"
+	"ports/repository/memory"
 	http_srv "ports/server/http"
 	"ports/task"
 	"sync"
@@ -37,18 +39,29 @@ func serveAction(c *cli.Context) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	//instantiate services
+
+	portService, err := services.NewPort(services.WithInMemoryPortRepository(memory.NewPort()))
+	if err != nil {
+		return fmt.Errorf("cannot instantiate Port Service: %w", err)
+	}
+	portImportService, err := services.NewPortImport(services.WithInMemoryPortImportRepository(memory.NewPort()))
+	if err != nil {
+		return fmt.Errorf("cannot instantiate Port Service: %w", err)
+	}
+
 	var wg sync.WaitGroup
 
 	//setup event dispatcher
 	// currently launching in the serve process, because test implementation
 	// implements only chan version of queue
 	// supposed to live in the separate process
-	dispatcher := task.NewDispatcher()
+	dispatcher := task.NewDispatcher(portImportService)
 	dispatcher.Sub()
 	dispatcher.Run(ctx)
 
 	//Setup http rest api server
-	restSrv := http_srv.New(cfg.Server.HTTP.Service, nil)
+	restSrv := http_srv.New(cfg.Server.HTTP.Service, log, portService)
 	startHTTPServer(&wg, restSrv.GetHTTPServer(), log)
 
 	go func() {

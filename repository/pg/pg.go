@@ -5,8 +5,8 @@ import "ports/domain"
 type Port struct {
 }
 
-func New() *Port {
-	return &Port{}
+func NewPort() (*Port, error) {
+	return &Port{}, nil
 }
 
 func (p *Port) GetById(id uint64) (*domain.Port, error) {

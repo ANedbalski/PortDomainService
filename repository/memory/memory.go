@@ -10,8 +10,7 @@ type Port struct {
 	sync.Mutex
 }
 
-// New is a factory function to generate a new repository of customers
-func New() *Port {
+func NewPort() *Port {
 	return &Port{
 		ports: make(map[uint64]*domain.Port),
 	}

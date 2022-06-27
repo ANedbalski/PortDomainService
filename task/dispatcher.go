@@ -2,13 +2,17 @@ package task
 
 import (
 	"context"
+	"ports/domain/services"
 )
 
 type Dispatcher struct {
+	portImportService *services.PortImport
 }
 
-func NewDispatcher() *Dispatcher {
-	return &Dispatcher{}
+func NewDispatcher(piService *services.PortImport) *Dispatcher {
+	return &Dispatcher{
+		portImportService: piService,
+	}
 }
 
 func (d *Dispatcher) Sub() {

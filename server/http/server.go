@@ -3,17 +3,19 @@ package http
 import (
 	chilogger "github.com/766b/chi-logger"
 	"github.com/go-chi/chi"
+	"ports/domain/services"
 
 	"go.uber.org/zap"
 	"net/http"
 )
 
 type Server struct {
-	server *http.Server
-	log    *zap.SugaredLogger
+	server      *http.Server
+	log         *zap.SugaredLogger
+	portService services.Port
 }
 
-func New(host string, log *zap.SugaredLogger) *Server {
+func New(host string, log *zap.SugaredLogger, ps *services.Port) *Server {
 	mux := chi.NewMux()
 	mux.Use(chilogger.NewZapMiddleware("router", log.Desugar()))
 

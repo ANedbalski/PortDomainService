@@ -15,4 +15,7 @@ func (s *Server) PortsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
+	// getting the incoming file and store it in the storage
+	// then publish task to the event dispatcher
 }
