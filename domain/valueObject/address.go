@@ -1,9 +1,12 @@
 package valueObject
 
-import "time"
+import (
+	"ports/domain/entity"
+	"time"
+)
 
 type Address struct {
-	Country  Country
+	Country  entity.Country
 	City     string
 	Province string
 	Timezone time.Location

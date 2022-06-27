@@ -1,8 +1,10 @@
 package domain
 
+import "ports/domain/valueObject"
+
 type Port struct {
-	ID      uint64
-	Name    string
-	Address Address
+	// Port code is used as ID of port
 	Code    string
+	Name    string
+	Address valueObject.Address
 }

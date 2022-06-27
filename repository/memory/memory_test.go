@@ -10,20 +10,20 @@ import (
 func TestPort_GetById(t *testing.T) {
 	testCases := []struct {
 		name   string
-		id     uint64
+		code   string
 		exp    *domain.Port
 		expErr error
 	}{
 		{
 			name:   "port doesn't exists in the DB",
-			id:     5,
+			code:   "5",
 			exp:    nil,
 			expErr: domain.ErrPortNotFound,
 		},
 		{
 			name:   "port exists in the DB",
-			id:     1,
-			exp:    &domain.Port{ID: 1, Name: "A1"},
+			code:   "1",
+			exp:    &domain.Port{Code: "1", Name: "A1"},
 			expErr: nil,
 		},
 	}
@@ -32,7 +32,7 @@ func TestPort_GetById(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			db := initDBWithFixtures()
 
-			port, err := db.GetById(tt.id)
+			port, err := db.GetById(tt.code)
 
 			assert.Equal(t, tt.exp, port)
 			assert.Equal(t, tt.expErr, err)
@@ -48,7 +48,7 @@ func TestPort_Add(t *testing.T) {
 	}{
 		{
 			name:   "validate no error",
-			port:   &domain.Port{ID: 10, Name: "A10"},
+			port:   &domain.Port{Code: "10", Name: "A10"},
 			expErr: nil,
 		},
 	}
@@ -60,7 +60,7 @@ func TestPort_Add(t *testing.T) {
 			err := db.Add(tt.port)
 
 			assert.Equal(t, tt.expErr, err)
-			assert.Equal(t, tt.port, db.ports[tt.port.ID])
+			assert.Equal(t, tt.port, db.ports[tt.port.Code])
 		})
 	}
 }
@@ -73,12 +73,12 @@ func TestPort_Save(t *testing.T) {
 	}{
 		{
 			name:   "Port exists in DB and record updated",
-			port:   &domain.Port{ID: 1, Name: "A1111"},
+			port:   &domain.Port{Code: "1", Name: "A1111"},
 			expErr: nil,
 		},
 		{
 			name:   "Port don't exists in DB return error",
-			port:   &domain.Port{ID: 10, Name: "A10"},
+			port:   &domain.Port{Code: "10", Name: "A10"},
 			expErr: domain.ErrPortNotFound,
 		},
 	}
@@ -91,7 +91,7 @@ func TestPort_Save(t *testing.T) {
 
 			assert.Equal(t, tt.expErr, err)
 			if err == nil {
-				assert.Equal(t, db.ports[tt.port.ID], tt.port)
+				assert.Equal(t, db.ports[tt.port.Code], tt.port)
 			}
 		})
 	}
@@ -104,11 +104,11 @@ func TestPort_UpdateOrCreate(t *testing.T) {
 	}{
 		{
 			name: "update existing port",
-			port: &domain.Port{ID: 1, Name: "A1111"},
+			port: &domain.Port{Code: "1", Name: "A1111"},
 		},
 		{
 			name: "add new port",
-			port: &domain.Port{ID: 10, Name: "A10"},
+			port: &domain.Port{Code: "10", Name: "A10"},
 		},
 	}
 
@@ -121,7 +121,7 @@ func TestPort_UpdateOrCreate(t *testing.T) {
 			if !assert.Nil(t, err) {
 				return
 			}
-			assert.Equal(t, db.ports[tt.port.ID], tt.port)
+			assert.Equal(t, db.ports[tt.port.Code], tt.port)
 		})
 	}
 
@@ -129,10 +129,10 @@ func TestPort_UpdateOrCreate(t *testing.T) {
 
 func initDBWithFixtures() *Port {
 	db := &Port{
-		ports: map[uint64]*domain.Port{
-			1: {ID: 1, Name: "A1"},
-			3: {ID: 3, Name: "A3"},
-			2: {ID: 2, Name: "A2"},
+		ports: map[string]*domain.Port{
+			"1": {Code: "1", Name: "A1"},
+			"2": {Code: "2", Name: "A2"},
+			"3": {Code: "3", Name: "A3"},
 		},
 	}
 	return db

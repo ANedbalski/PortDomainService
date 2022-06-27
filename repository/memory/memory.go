@@ -6,17 +6,17 @@ import (
 )
 
 type Port struct {
-	ports map[uint64]*domain.Port
+	ports map[string]*domain.Port
 	sync.Mutex
 }
 
 func NewPort() *Port {
 	return &Port{
-		ports: make(map[uint64]*domain.Port),
+		ports: make(map[string]*domain.Port),
 	}
 }
 
-func (p *Port) GetById(id uint64) (*domain.Port, error) {
+func (p *Port) GetById(id string) (*domain.Port, error) {
 	if port, ok := p.ports[id]; ok {
 		return port, nil
 	}
@@ -24,9 +24,9 @@ func (p *Port) GetById(id uint64) (*domain.Port, error) {
 }
 
 func (p *Port) Save(port *domain.Port) error {
-	if _, ok := p.ports[port.ID]; ok {
+	if _, ok := p.ports[port.Code]; ok {
 		p.Lock()
-		p.ports[port.ID] = port
+		p.ports[port.Code] = port
 		p.Unlock()
 		return nil
 	}
@@ -43,7 +43,7 @@ func (p *Port) UpdateOrCreate(port *domain.Port) error {
 
 func (p *Port) Add(port *domain.Port) error {
 	p.Lock()
-	p.ports[port.ID] = port
+	p.ports[port.Code] = port
 	p.Unlock()
 	return nil
 }
